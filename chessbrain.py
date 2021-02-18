@@ -1,25 +1,27 @@
+
 import chess
 import numpy
 
 # This is the way we evaluate the board, If the addition of all piecs on the board with these values is negative black is winning, vise versa
 piece_values = {'P': 10, 'N': 30, 'B': 30, 'R': 50, 'Q': 90, 'K': 100, 'p': -10, 'n': -30, 'b': -30, 'r': -50, 'q': -90, 'k': -100}
+searched = 0
 
-
-def main():
-
-    board = chess.Board()
-
-    while not board.is_game_over():
-        print(board)
-        while True:
-            try:
-                move = input("Move: ")
-                board.push_san(move)
-            except:
-                continue
-            break
-        val, ai = getMove(board, 3, False)
-        board.push(chess.Move.from_uci(str(ai)))
+# def main():
+#
+#     board = chess.Board()
+#
+#     while not board.is_game_over():
+#         print(board)
+#         while True:
+#             try:
+#                 move = input("Move: ")
+#                 board.push_san(move)
+#             except:
+#                 continue
+#             break
+#         val, ai = getMove(board, 3, False)
+#         print(searched)
+#         board.push(chess.Move.from_uci(str(ai)))
 
 def calculatePos(board, piece_values=piece_values):
     pieces = list(board.piece_map().values())
@@ -32,6 +34,8 @@ def calculatePos(board, piece_values=piece_values):
 
 # simple minimax algorithm, no alpha-beta pruning yet.
 def getMove(board, depth, player):
+    global searched
+    searched += 1
     if depth == 0 or board.is_game_over():
         if player:
             return int(calculatePos(board))
@@ -120,5 +124,3 @@ def getMove(board, depth, player):
 #                 bestEval = value
 #                 bestEvalMove = f
 #         return bestEval, bestEvalMove
-
-main()
