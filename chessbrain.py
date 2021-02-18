@@ -6,22 +6,6 @@ import numpy
 piece_values = {'P': 10, 'N': 30, 'B': 30, 'R': 50, 'Q': 90, 'K': 100, 'p': -10, 'n': -30, 'b': -30, 'r': -50, 'q': -90, 'k': -100}
 searched = 0
 
-# def main():
-#
-#     board = chess.Board()
-#
-#     while not board.is_game_over():
-#         print(board)
-#         while True:
-#             try:
-#                 move = input("Move: ")
-#                 board.push_san(move)
-#             except:
-#                 continue
-#             break
-#         val, ai = getMove(board, 3, False)
-#         print(searched)
-#         board.push(chess.Move.from_uci(str(ai)))
 
 def calculatePos(board, piece_values=piece_values):
     pieces = list(board.piece_map().values())
@@ -80,6 +64,24 @@ def getMove(board, depth, player):
                 best_move = move
 
         return minimum, best_move
+
+# def main():
+#
+#     board = chess.Board()
+#
+#     while not board.is_game_over():
+#         print(board)
+#         while True:
+#             try:
+#                 move = input("Move: ")
+#                 board.push_san(move)
+#             except:
+#                 continue
+#             break
+#         val, ai = getMove(board, 3, False)
+#         print(searched)
+#         board.push(chess.Move.from_uci(str(ai)))
+
 
 # def boardEval(board, piece_values=piece_values):
 #     currEval = 0

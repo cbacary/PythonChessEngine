@@ -83,8 +83,27 @@ def main():
                                     board.push_san(squares[i].pos + squares[x].pos)
                                     squares[x].image = squares[i].image
                                     squares[i].image = None
+                                    screen = drawBoard(screen, squares)
+                                    var, move = chessbrain.getMove(board, 3, False)
+                                    print(move)
+                                    board.push(chess.Move.from_uci(str(move)))
+                                    found = False
+                                    for pos in squares:
+                                        for newPos in squares:
+                                            f = str(pos.pos + newPos.pos)
+                                            if f == str(move):
+                                                newPos.image = pos.image
+                                                pos.image = None
+                                                found = True
+                                                break
+                                        if found:
+                                            break
+
                                 except:
-                                    print("Not a valid move.")
+                                    if board.is_game_over() or board.is_stalemate():
+                                        print("Game Over!")
+                                    else:
+                                        print("Invalid Move.")
 
 
             elif event.type == pygame.MOUSEMOTION:
