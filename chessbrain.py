@@ -22,8 +22,12 @@ def getMove(board, depth, player):
     searched += 1
     if depth == 0 or board.is_game_over():
         if player:
+            if board.is_checkmate():
+                return -numpy.Infinity
             return int(calculatePos(board))
         else:
+            if board.is_checkmate():
+                return numpy.Infinity
             return int(-1*calculatePos(board))
 
     # white
@@ -65,22 +69,6 @@ def getMove(board, depth, player):
 
         return minimum, best_move
 
-# def main():
-#
-#     board = chess.Board()
-#
-#     while not board.is_game_over():
-#         print(board)
-#         while True:
-#             try:
-#                 move = input("Move: ")
-#                 board.push_san(move)
-#             except:
-#                 continue
-#             break
-#         val, ai = getMove(board, 3, False)
-#         print(searched)
-#         board.push(chess.Move.from_uci(str(ai)))
 
 
 # def boardEval(board, piece_values=piece_values):

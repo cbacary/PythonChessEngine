@@ -2,6 +2,7 @@ import sys, pygame
 import chess
 import Squares
 import chessbrain
+
 def main():
     pygame.init()
 
@@ -18,7 +19,7 @@ def main():
     squares = []
     # method for drawing chess board obtained from stack overflow, link lost somewhere in history
     count = 0
-    # this fen has no slashes, you must remove slashes for any fen to work, most fen's  probably won't work tho.
+    # this fen has no slashes, you must remove slashes for any fen to work, you also must remove the ending material that says "3 - 0" or something
     startingFen = 'rnbkqbnrpppppppp8888PPPPPPPPRNBKQBNR'
     fenCount = len(startingFen)- 1
     for i in range(8):
@@ -69,21 +70,27 @@ def main():
                             mouse_x, mouse_y = event.pos
                             offset_x = i.posx - mouse_x
                             offset_y = i.posy - mouse_y
-                            screen.blit(i.image, (i.posx, i.posy))
+                            screen.blit(i.image, (x, y))
 
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 for i in range(len(squares)):
                     if squares[i].dragging:
                         squares[i].dragging = False
+                        screen.blit(squares[i].image, (x, y))
                         print(event.pos)
                         for x in range(len(squares)):
                             if squares[x].rectangle.collidepoint(event.pos) and squares[x] != squares[i]:
                                 try:
                                     print(squares[i].pos + squares[x].pos)
-                                    board.push_san(squares[i].pos + squares[x].pos)
+                                    squares = checkCastle(board, squares, squares[i].pos + squares[x].pos)
+                                    if squares[i].pos[1] == '7' and squares[i].piece == 'p' and squares[x].pos[1] == '8':
+                                        board.push_uci(squares[i].pos + squares[x].pos + 'q')
+                                    elif squares[i].pos[1] == '8' and squares[i].piece == 'P' and squares[x].pos[1] == '8':
+                                        board.push_uci(squares[i].pos + squares[x].pos + 'q')
+                                    else:
+                                        board.push_san(squares[i].pos + squares[x].pos)
                                     squares[x].image = squares[i].image
                                     squares[i].image = None
-                                    screen = drawBoard(screen, squares)
                                     var, move = chessbrain.getMove(board, 3, False)
                                     print(move)
                                     board.push(chess.Move.from_uci(str(move)))
@@ -104,8 +111,6 @@ def main():
                                         print("Game Over!")
                                     else:
                                         print("Invalid Move.")
-
-
             elif event.type == pygame.MOUSEMOTION:
                 for i in squares:
                     if i.image == None:
@@ -114,10 +119,74 @@ def main():
                         mouse_x, mouse_y = event.pos
                         x = mouse_x + offset_x
                         y = mouse_y + offset_y
-
                         screen.blit(i.image, (x, y))
         # loop through squares and place each piece accordingly each update.
         pygame.display.update()
+
+def checkCastle(board, squares, move):
+    try:
+        # King side white castle
+        if move == 'e1g1':
+            found = False
+            print('castled')
+            for rook in squares:
+                if rook.pos == 'h1':
+                    for f1 in squares:
+                        if f1.pos == 'f1':
+                            f1.image = rook.image
+                            rook.image = None
+                            foun    # King side white castle
+        if move == 'e1g1':
+            found = False
+            print('castled')
+            for rook in squares:
+                if rook.pos == 'h1':
+                    for f1 in squares:
+                        if f1.pos == 'f1':
+                            f1.image = rook.image
+                            rook.image = None
+                            found = True
+                if found:
+                    break
+        # Queen side white castle
+        if move == 'e1c1':
+            found = False
+            print('castled')
+            for rook in squares:
+                if rook.pos == 'a1':
+                    for d1 in squares:
+                        if d1.pos == 'd1':
+                            d1.image = rook.image
+                            rook.image = None
+                            found = True
+                if found:
+                    break
+        # Queen side black castle
+        if move == 'e8c8':
+            found = False
+            print('castled')
+            for rook in squares:
+                if rook.pos == 'a8':
+                    for d1 in squares:
+                        if d1.pos == 'd8':
+                            d1.image = rook.image
+                            rook.image = None
+                            found = True
+                if found:
+                    break
+        # King side black castle
+        if move == 'e8g8':
+            found = False
+            print('castled')
+            for rook in squares:
+                if rook.pos == 'h1':
+                    for f1 in squares:
+                        if f1.pos == 'f1':
+                            f1.image = rook.image
+                            rook.image = None
+    except:
+        pass
+    return squares
 
 def drawBoard(screen, squares):
     white  = (255, 255, 255)
@@ -138,4 +207,5 @@ def drawBoard(screen, squares):
             count += 1
         count -= 1
     return screen
+
 main()
