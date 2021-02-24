@@ -24,5 +24,13 @@ class Squares:
         else:
             self.image = None
 
-    def createImgRect(self, imgRect):
-        self.imgRect = imgRect
+    def redoImg(self, piece):
+        self.piece = piece
+        if self.piece.islower():
+            self.image = pygame.image.load('/home/cbac/Desktop/prgTHINGS/PythonThings/ChessEngine/Pieces/White Pieces/' + self.piece + ".png")
+            width, height = self.image.get_size()
+            self.image = pygame.transform.scale(self.image, (int(width / 3) , int(height / 3 )))
+        else:
+            self.image = pygame.image.load('/home/cbac/Desktop/prgTHINGS/PythonThings/ChessEngine/Pieces/Black Pieces/' + self.piece + ".png")
+            width, height = self.image.get_size()
+            self.image = pygame.transform.scale(self.image, (int(width / 3) , int(height / 3 )))

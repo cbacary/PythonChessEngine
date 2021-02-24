@@ -1,8 +1,8 @@
-import sys, pygame
+import sys, pygame, numpy
 import chess
 import Squares
 import chessbrain
-
+import time
 def main():
     pygame.init()
 
@@ -15,7 +15,7 @@ def main():
     black = (161, 96, 43)
 
     board = chess.Board()
-
+    board_squares = chess.SquareSet()
     squares = []
     # method for drawing chess board obtained from stack overflow, link lost somewhere in history
     count = 0
@@ -76,24 +76,46 @@ def main():
                 for i in range(len(squares)):
                     if squares[i].dragging:
                         squares[i].dragging = False
-                        screen.blit(squares[i].image, (x, y))
                         print(event.pos)
                         for x in range(len(squares)):
                             if squares[x].rectangle.collidepoint(event.pos) and squares[x] != squares[i]:
+
+                                # We use a try except because it will raise ValueError on illegal move
                                 try:
                                     print(squares[i].pos + squares[x].pos)
+
+                                    # Check for a castle and return the new board version if it is new at all.
                                     squares = checkCastle(board, squares, squares[i].pos + squares[x].pos)
-                                    if squares[i].pos[1] == '7' and squares[i].piece == 'p' and squares[x].pos[1] == '8':
-                                        board.push_uci(squares[i].pos + squares[x].pos + 'q')
-                                    elif squares[i].pos[1] == '8' and squares[i].piece == 'P' and squares[x].pos[1] == '8':
-                                        board.push_uci(squares[i].pos + squares[x].pos + 'q')
+
+                                    # Check to make sure is legal move using generate_legal_moves not legal_moves.
+                                    if chess.Move.from_uci(squares[i].pos + squares[x].pos + 'q') in list(board.generate_legal_moves()):
+
+                                        print("Promotion!")
+
+                                        # Have to move the piece using from_uci otherwise library does not recongnize as legal
+                                        board.push(chess.Move.from_uci(squares[i].pos + squares[x].pos + 'q'))
+
+                                        # Reset the image variable to new correct image
+                                        squares[x].redoImg('q')
+                                        squares[i].image = None
+
                                     else:
                                         board.push_san(squares[i].pos + squares[x].pos)
-                                    squares[x].image = squares[i].image
-                                    squares[i].image = None
-                                    var, move = chessbrain.getMove(board, 3, False)
-                                    print(move)
+                                        squares[x].image = squares[i].image
+                                        squares[i].image = None
+
+                                    # Get move
+                                    move = chessbrain.getMove(board, 3, 3, True, True, -numpy.Infinity, numpy.Infinity)
+                                    print(move, chessbrain.searched)
+                                    chessbrain.searched = 0
+
+                                    # Check if castle
+                                    squares = checkCastle(board, squares, str(move))
+
+                                    # Push the move, we can use from_uci because it should always be legal.
                                     board.push(chess.Move.from_uci(str(move)))
+
+
                                     found = False
                                     for pos in squares:
                                         for newPos in squares:
@@ -105,7 +127,6 @@ def main():
                                                 break
                                         if found:
                                             break
-
                                 except:
                                     if board.is_game_over() or board.is_stalemate():
                                         print("Game Over!")
@@ -132,17 +153,7 @@ def checkCastle(board, squares, move):
             for rook in squares:
                 if rook.pos == 'h1':
                     for f1 in squares:
-                        if f1.pos == 'f1':
-                            f1.image = rook.image
-                            rook.image = None
-                            foun    # King side white castle
-        if move == 'e1g1':
-            found = False
-            print('castled')
-            for rook in squares:
-                if rook.pos == 'h1':
-                    for f1 in squares:
-                        if f1.pos == 'f1':
+                        if f1.pos == 'f1' and rook.piece == 'r':
                             f1.image = rook.image
                             rook.image = None
                             found = True
@@ -153,7 +164,7 @@ def checkCastle(board, squares, move):
             found = False
             print('castled')
             for rook in squares:
-                if rook.pos == 'a1':
+                if rook.pos == 'a1' and rook.piece == 'r':
                     for d1 in squares:
                         if d1.pos == 'd1':
                             d1.image = rook.image
@@ -166,7 +177,7 @@ def checkCastle(board, squares, move):
             found = False
             print('castled')
             for rook in squares:
-                if rook.pos == 'a8':
+                if rook.pos == 'a8' and rook.piece == 'R':
                     for d1 in squares:
                         if d1.pos == 'd8':
                             d1.image = rook.image
@@ -179,11 +190,14 @@ def checkCastle(board, squares, move):
             found = False
             print('castled')
             for rook in squares:
-                if rook.pos == 'h1':
-                    for f1 in squares:
-                        if f1.pos == 'f1':
-                            f1.image = rook.image
+                if rook.pos == 'h8' and rook.piece == 'R':
+                    for f8 in squares:
+                        if f8.pos == 'f8':
+                            f8.image = rook.image
                             rook.image = None
+                            found = True
+                if found:
+                    break
     except:
         pass
     return squares
