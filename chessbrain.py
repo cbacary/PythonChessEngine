@@ -10,6 +10,8 @@ searched = 0
 # a bit according to https://en.wikipedia.org/wiki/Chess_piece_relative_value
 # here is the stackoverflow question: https://stackoverflow.com/questions/59039152/python-chess-minimax-algorithm-how-to-play-with-black-pieces-bot-has-white
 
+infinity = 99999999
+
 position_values = {
         'P' : numpy.array([ [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
                         [5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0],
@@ -66,7 +68,7 @@ position_values = {
                        [  2.0,  3.0,  1.0,  0.0,  0.0,  1.0,  3.0,  2.0 ]])}
 
 # this function was also obtained from the same stackoverflow question
-def calculatePos(board, piece_values=piece_values, position_values = position_values):
+def calculatePos(board, piece_values=piece_values, position_values = position_values, infinity=infinity):
 
     pieces = board.piece_map()
     eval = 0
@@ -86,33 +88,34 @@ def calculatePos(board, piece_values=piece_values, position_values = position_va
         else:
             eval += piece_values[piece_type] - positionArray[rank, file]
 
-
     return eval
 
 # simple minimax algorithm with alpha beta pruning. The useAlphaBeta is mainly there for testing purposes.
 def getMove(board, depth, initialDepth, player, useAlphaBeta, alpha, beta):
     global searched
     searched += 1
-    # base case, if depth = or the node is a terminal node aka game is over
+    # base case, if depth = 0 or the node is a terminal node aka game is over
     if depth == 0 or board.is_game_over():
         if player:
             if board.is_checkmate():
-                if board.is_stalemate():
-                    return 0
-                return -numpy.Infinity
+                return -infinity
+            if board.is_stalemate():
+                return 0
             return int(calculatePos(board))
         else:
             if board.is_checkmate():
-                if board.is_stalemate():
-                    return 0
-                return numpy.Infinity
+                return infinity
+            if board.is_stalemate():
+                return 0
             return int(-calculatePos(board))
+        # return int(calculatePos(board))
 
-    # white
+
+    # White
     best_move = None
     if player:
-        max = -numpy.Infinity
-        best_value_move = -numpy.Infinity
+        max = -infinity
+        best_value_move = -infinity
         move_list = list(board.generate_legal_moves())
         for move in move_list:
 
@@ -124,7 +127,9 @@ def getMove(board, depth, initialDepth, player, useAlphaBeta, alpha, beta):
             curr_eval = getMove(temp, depth-1, initialDepth, False, useAlphaBeta, alpha, beta)
             max = numpy.maximum(max, curr_eval)
 
-            if useAlphaBeta:
+
+            # Alpha-beta pruning pseudo code can be found at https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
+            if useAlphaBeta and max != infinity:
 
                 alpha = numpy.maximum(alpha, max)
 
@@ -137,10 +142,12 @@ def getMove(board, depth, initialDepth, player, useAlphaBeta, alpha, beta):
 
         if depth < initialDepth:
             return max
+        print(max)
+    # Black
     else:
-        minimum = numpy.Infinity
-        best_value_move = numpy.Infinity
-        move_list = list(board.legal_moves)
+        minimum = infinity
+        best_value_move = infinity
+        move_list = list(board.generate_legal_moves())
         for move in move_list:
             # Create a separate board
             temp = chess.Board(board.fen())
@@ -150,7 +157,8 @@ def getMove(board, depth, initialDepth, player, useAlphaBeta, alpha, beta):
             curr_eval = getMove(temp, depth-1, initialDepth, True, useAlphaBeta, alpha, beta)
             minimum = numpy.minimum(minimum, curr_eval)
 
-            if useAlphaBeta:
+            # Alpha-beta pruning pseudo code can be found at https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
+            if useAlphaBeta and minimum != -infinity:
 
                 beta = numpy.minimum(beta, minimum)
 
@@ -165,4 +173,10 @@ def getMove(board, depth, initialDepth, player, useAlphaBeta, alpha, beta):
 
         if depth < initialDepth:
             return minimum
+        print(minimum)
+
+    # If checkmate is the only move available best_move will never be set so just return the first legal move
+    if best_move == None:
+        print("forced mate on every search or something went wrong")
+        return list(board.generate_legal_moves())[0]
     return best_move

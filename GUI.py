@@ -59,6 +59,33 @@ def main():
     x, y = 0, 0
     while True:
         screen = drawBoard(screen, squares)
+
+        # if board.turn == chess.WHITE:
+        #     # Get move
+        #     move = chessbrain.getMove(board, 3, 3, False, True, -numpy.Infinity, numpy.Infinity)
+        #     print(move, chessbrain.searched)
+        #     chessbrain.searched = 0
+        #
+        #     # Check if castle
+        #     squares = checkCastle(board, squares, str(move))
+        #
+        #     # Push the move, we can use from_uci because it should always be legal.
+        #     board.push(chess.Move.from_uci(str(move)))
+        #
+        #     found = False
+        #
+        #     # Make the move from the engine on the graphical board
+        #     for pos in squares:
+        #         for newPos in squares:
+        #             f = str(pos.pos + newPos.pos)
+        #             if f == str(move):
+        #                 newPos.image = pos.image
+        #                 pos.image = None
+        #                 found = True
+        #                 break
+        #         if found:
+        #             break
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -80,8 +107,9 @@ def main():
                         for x in range(len(squares)):
                             if squares[x].rectangle.collidepoint(event.pos) and squares[x] != squares[i]:
 
-                                # We use a try except because it will raise ValueError on illegal move
+                                # We use a try except because it will raise ValueError on illegal move or on Game Over
                                 try:
+
                                     print(squares[i].pos + squares[x].pos)
 
                                     # Check for a castle and return the new board version if it is new at all.
@@ -104,7 +132,7 @@ def main():
                                         squares[x].image = squares[i].image
                                         squares[i].image = None
 
-                                    # Get move
+
                                     move = chessbrain.getMove(board, 3, 3, True, True, -numpy.Infinity, numpy.Infinity)
                                     print(move, chessbrain.searched)
                                     chessbrain.searched = 0
@@ -115,18 +143,31 @@ def main():
                                     # Push the move, we can use from_uci because it should always be legal.
                                     board.push(chess.Move.from_uci(str(move)))
 
-
-                                    found = False
-                                    for pos in squares:
-                                        for newPos in squares:
-                                            f = str(pos.pos + newPos.pos)
-                                            if f == str(move):
-                                                newPos.image = pos.image
-                                                pos.image = None
-                                                found = True
+                                    if str(move)[len(move) - 1] == 'q':
+                                        found = False
+                                        for pos in squares:
+                                            for newPos in squares:
+                                                f = str(pos.pos + newPos.pos + 'q')
+                                                if f == str(move):
+                                                    newPos.redoImg('Q')
+                                                    pos.image = None
+                                                    found = True
+                                                    break
+                                            if found:
                                                 break
-                                        if found:
-                                            break
+                                    else:
+                                        found = False
+                                        for pos in squares:
+                                            for newPos in squares:
+                                                f = str(pos.pos + newPos.pos)
+                                                if f == str(move):
+                                                    newPos.image = pos.image
+                                                    pos.image = None
+                                                    found = True
+                                                    break
+                                            if found:
+                                                break
+                                    print(board.fen())
                                 except:
                                     if board.is_game_over() or board.is_stalemate():
                                         print("Game Over!")
