@@ -3,6 +3,7 @@ import chess
 import Squares
 import chessbrain
 import time
+
 def main():
     pygame.init()
 
