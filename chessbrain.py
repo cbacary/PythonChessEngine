@@ -98,16 +98,16 @@ def getMove(board, depth, initialDepth, player, useAlphaBeta, alpha, beta):
     if depth == 0 or board.is_game_over():
         if player:
             if board.is_checkmate():
-                return -infinity
+                return infinity
             if board.is_stalemate():
                 return 0
-            return int(calculatePos(board))
+            return calculatePos(board)
         else:
             if board.is_checkmate():
                 return infinity
             if board.is_stalemate():
                 return 0
-            return int(-calculatePos(board))
+            return -calculatePos(board)
         # return int(calculatePos(board))
 
 
