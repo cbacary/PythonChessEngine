@@ -97,7 +97,7 @@ def main():
                             mouse_x, mouse_y = event.pos
                             offset_x = i.posx - mouse_x
                             offset_y = i.posy - mouse_y
-                            screen.blit(i.image, (x, y))
+
 
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 for i in range(len(squares)):
@@ -173,6 +173,7 @@ def main():
                                         print("Game Over!")
                                     else:
                                         print("Invalid Move.")
+
             elif event.type == pygame.MOUSEMOTION:
                 for i in squares:
                     if i.image == None:
@@ -183,6 +184,9 @@ def main():
                         y = mouse_y + offset_y
                         screen.blit(i.image, (x, y))
         # loop through squares and place each piece accordingly each update.
+        for i in squares:
+            if i.dragging:
+                screen.blit(i.image, (x, y))
         pygame.display.update()
 
 def checkCastle(board, squares, move):
