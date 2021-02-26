@@ -91,18 +91,18 @@ def calculatePos(board, piece_values=piece_values, position_values = position_va
     return eval
 
 # simple minimax algorithm with alpha beta pruning. The useAlphaBeta is mainly there for testing purposes.
-def getMove(board, depth, initialDepth, player, useAlphaBeta, alpha, beta):
+def getMove(board, depth, initialDepth, player, useAlphaBeta, color, alpha, beta):
     global searched
     searched += 1
     # base case, if depth = 0 or the node is a terminal node aka game is over
     if depth == 0 or board.is_game_over():
-        if player:
+        if color == 'WHITE':
             if board.is_checkmate():
-                return infinity
+                return -infinity
             if board.is_stalemate():
                 return 0
-            return calculatePos(board)
-        else:
+            return -calculatePos(board)
+        elif color == 'BLACK':
             if board.is_checkmate():
                 return infinity
             if board.is_stalemate():
@@ -124,7 +124,7 @@ def getMove(board, depth, initialDepth, player, useAlphaBeta, alpha, beta):
             temp.push_san(str(move))
 
             # get the current value of board
-            curr_eval = getMove(temp, depth-1, initialDepth, False, useAlphaBeta, alpha, beta)
+            curr_eval = getMove(temp, depth-1, initialDepth, False, useAlphaBeta, color, alpha, beta)
             max = numpy.maximum(max, curr_eval)
 
 
@@ -154,7 +154,7 @@ def getMove(board, depth, initialDepth, player, useAlphaBeta, alpha, beta):
             temp.push_san(str(move))
 
             # get the current value of board
-            curr_eval = getMove(temp, depth-1, initialDepth, True, useAlphaBeta, alpha, beta)
+            curr_eval = getMove(temp, depth-1, initialDepth, True, useAlphaBeta, color, alpha, beta)
             minimum = numpy.minimum(minimum, curr_eval)
 
             # Alpha-beta pruning pseudo code can be found at https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning

@@ -62,8 +62,7 @@ def main():
         screen = drawBoard(screen, squares)
 
         # if board.turn == chess.WHITE:
-        #     # Get move
-        #     move = chessbrain.getMove(board, 3, 3, False, True, -numpy.Infinity, numpy.Infinity)
+        #     move = chessbrain.getMove(board, 3, 3, False, True, 'WHITE', -numpy.Infinity, numpy.Infinity)
         #     print(move, chessbrain.searched)
         #     chessbrain.searched = 0
         #
@@ -73,19 +72,31 @@ def main():
         #     # Push the move, we can use from_uci because it should always be legal.
         #     board.push(chess.Move.from_uci(str(move)))
         #
-        #     found = False
-        #
-        #     # Make the move from the engine on the graphical board
-        #     for pos in squares:
-        #         for newPos in squares:
-        #             f = str(pos.pos + newPos.pos)
-        #             if f == str(move):
-        #                 newPos.image = pos.image
-        #                 pos.image = None
-        #                 found = True
+        #     if str(move)[len(move) - 1] == 'q':
+        #         found = False
+        #         for pos in squares:
+        #             for newPos in squares:
+        #                 f = str(pos.pos + newPos.pos + 'q')
+        #                 if f == str(move):
+        #                     newPos.redoImg('Q')
+        #                     pos.image = None
+        #                     found = True
+        #                     break
+        #             if found:
         #                 break
-        #         if found:
-        #             break
+        #     else:
+        #         found = False
+        #         for pos in squares:
+        #             for newPos in squares:
+        #                 f = str(pos.pos + newPos.pos)
+        #                 if f == str(move):
+        #                     newPos.image = pos.image
+        #                     pos.image = None
+        #                     found = True
+        #                     break
+        #             if found:
+        #                 break
+        #     print(board.fen())
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -98,9 +109,11 @@ def main():
                             mouse_x, mouse_y = event.pos
                             offset_x = i.posx - mouse_x
                             offset_y = i.posy - mouse_y
+                            x, y = event.pos[0], event.pos[1]
 
 
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                x , y = 0, 0
                 for i in range(len(squares)):
                     if squares[i].dragging:
                         squares[i].dragging = False
@@ -134,7 +147,7 @@ def main():
                                         squares[i].image = None
 
 
-                                    move = chessbrain.getMove(board, 3, 3, True, True, -numpy.Infinity, numpy.Infinity)
+                                    move = chessbrain.getMove(board, 3, 3, True, True, 'BLACK', -numpy.Infinity, numpy.Infinity)
                                     print(move, chessbrain.searched)
                                     chessbrain.searched = 0
 
@@ -169,6 +182,7 @@ def main():
                                             if found:
                                                 break
                                     print(board.fen())
+
                                 except:
                                     if board.is_game_over() or board.is_stalemate():
                                         print("Game Over!")
