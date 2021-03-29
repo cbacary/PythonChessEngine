@@ -94,6 +94,7 @@ def calculatePos(board, piece_values=piece_values, position_values = position_va
 
     return eval
 
+## Curently scrapped idea, not really optimised for alpha beta pruning and minimax search. Keeping it in here just in case I ever come back to it.
 def GetMoveWithThreading(board, depth, initialDepth, player, useAlphaBeta, color, alpha, beta):
     threads = []
     move_list = list(board.generate_legal_moves())
@@ -124,7 +125,7 @@ def GetMoveWithThreading(board, depth, initialDepth, player, useAlphaBeta, color
 
 
 # simple minimax algorithm with alpha beta pruning. The useAlphaBeta is mainly there for testing purposes.
-def getMove(board, depth, initialDepth, player, useAlphaBeta, color, alpha, beta, useThreading):
+def getMove(board, depth, initialDepth, player, useAlphaBeta, color, alpha, beta, useThreading = False):
     global searched
     searched += 1
 

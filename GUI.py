@@ -110,7 +110,7 @@ def main():
                                     squares[i].image = None
 
                                 start = time.time()
-                                move = chessbrain.GetMoveWithThreading(board, 3, 3, True, True, 'BLACK', -numpy.Infinity, numpy.Infinity)
+                                move = chessbrain.getMove(board, 3, 3, True, True, 'BLACK', -numpy.Infinity, numpy.Infinity)
                                 print(move, chessbrain.searched, time.time() - start)
                                 chessbrain.searched = 0
                                 # Check if castle
