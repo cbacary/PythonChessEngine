@@ -1,6 +1,10 @@
-
+from save_thread_result import ThreadWithResult
+import threading
+import os
 import chess
 import numpy
+import time
+import sys
 
 # This is the way we evaluate the board, If the addition of all piecs on the board with these values is negative black is winning, vise versa
 piece_values = {'P': 10, 'N': 35, 'B': 35, 'R': 52.5, 'Q': 100, 'K': 1000, 'p': -10, 'n': -35, 'b': -35, 'r': -52.5, 'q': -100, 'k': -1000}
@@ -90,10 +94,40 @@ def calculatePos(board, piece_values=piece_values, position_values = position_va
 
     return eval
 
+def GetMoveWithThreading(board, depth, initialDepth, player, useAlphaBeta, color, alpha, beta):
+    threads = []
+    move_list = list(board.generate_legal_moves())
+    for i in move_list:
+
+        # Generate new instance of board
+        temp = chess.Board(board.fen())
+        temp.push_san(str(i))
+
+        # thread = threading.Thread(target=lambda q, arg1: q.put(getMove(arg1)), args=(que, temp, depth - 1, initialDepth, tempPlayer, useAlphaBeta, color, alpha, beta))
+
+        # thread = threading.Thread(target=getMove, args=(temp, depth - 1, initialDepth, not player, useAlphaBeta, color, alpha, beta, True))
+        thread = ThreadWithResult(target=getMove, args=(temp, depth - 1, initialDepth, not player, useAlphaBeta, color, alpha, beta, True, ))
+        print("a")
+        thread.start()
+        threads.append([thread, str(i)])
+
+    for i in range(len(threads)):
+        threads[i][0].join()
+
+    best_move = threads[0][1]
+    best_move_numerical = threads[0][0].result
+    for index, tuple in enumerate(threads):
+        if tuple[0].result > best_move_numerical:
+            best_move_numerical = tuple[0].result
+            best_move = tuple[1]
+    return best_move
+
+
 # simple minimax algorithm with alpha beta pruning. The useAlphaBeta is mainly there for testing purposes.
-def getMove(board, depth, initialDepth, player, useAlphaBeta, color, alpha, beta):
+def getMove(board, depth, initialDepth, player, useAlphaBeta, color, alpha, beta, useThreading):
     global searched
     searched += 1
+
     # base case, if depth = 0 or the node is a terminal node aka game is over
     if depth == 0 or board.is_game_over():
         if color == 'WHITE':
@@ -109,22 +143,19 @@ def getMove(board, depth, initialDepth, player, useAlphaBeta, color, alpha, beta
                 return 0
             return -calculatePos(board)
         # return int(calculatePos(board))
-
-
-    # White
+    # Black
     best_move = None
     if player:
         max = -infinity
         best_value_move = -infinity
         move_list = list(board.generate_legal_moves())
         for move in move_list:
-
             # Create a separate board
             temp = chess.Board(board.fen())
             temp.push_san(str(move))
 
             # get the current value of board
-            curr_eval = getMove(temp, depth-1, initialDepth, False, useAlphaBeta, color, alpha, beta)
+            curr_eval = getMove(temp, depth-1, initialDepth, False, useAlphaBeta, color, alpha, beta, useThreading)
             max = numpy.maximum(max, curr_eval)
 
 
@@ -142,8 +173,7 @@ def getMove(board, depth, initialDepth, player, useAlphaBeta, color, alpha, beta
 
         if depth < initialDepth:
             return max
-        print(max)
-    # Black
+    # White
     else:
         minimum = infinity
         best_value_move = infinity
@@ -154,7 +184,7 @@ def getMove(board, depth, initialDepth, player, useAlphaBeta, color, alpha, beta
             temp.push_san(str(move))
 
             # get the current value of board
-            curr_eval = getMove(temp, depth-1, initialDepth, True, useAlphaBeta, color, alpha, beta)
+            curr_eval = getMove(temp, depth-1, initialDepth, True, useAlphaBeta, color, alpha, beta, useThreading)
             minimum = numpy.minimum(minimum, curr_eval)
 
             # Alpha-beta pruning pseudo code can be found at https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
@@ -173,10 +203,14 @@ def getMove(board, depth, initialDepth, player, useAlphaBeta, color, alpha, beta
 
         if depth < initialDepth:
             return minimum
-        print(minimum)
-
     # If checkmate is the only move available best_move will never be set so just return the first legal move
     if best_move == None:
         print("forced mate on every search or something went wrong")
         return list(board.generate_legal_moves())[0]
-    return best_move
+    if not useThreading:
+        print(best_move)
+        return best_move
+    elif player:
+        return max
+    elif not player:
+        return minimum
