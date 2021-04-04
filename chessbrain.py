@@ -1,11 +1,8 @@
-from save_thread_result import ThreadWithResult
-import threading
 import os
 import chess
 import numpy
 import time
 import sys
-from functools import cache
 
 
 # This is the way we evaluate the board, If the addition of all piecs on the board with these values is negative black is winning, vise versa
@@ -88,23 +85,18 @@ def calculatePos(board, piece_values=piece_values, position_values = position_va
     eval = 0
 
     for i in pieces:
-        # eval += piece_values[str(i)]
         file = chess.square_file(i)
         rank = chess.square_rank(i)
-        
+
         piece_type = str(pieces[i])
 
         if piece_type.isupper():
-            start_time = time.time()
             tempArr = flipped_pos_vales[piece_type.upper()]
             eval += piece_values[piece_type] + tempArr[rank, file]
-            timeCalcPos += (time.time() - start_time)
 
         else:
-            start_time = time.time()
             positionArray = position_values[piece_type.upper()]
             eval += piece_values[piece_type] - positionArray[rank, file]
-            timeCalcPos += (time.time() - start_time)
 
     return eval
 
