@@ -76,7 +76,6 @@ def main():
 
 
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                x , y = 0, 0
                 for i in range(len(squares)):
                     if squares[i].dragging:
                         squares[i].dragging = False
@@ -85,69 +84,19 @@ def main():
                             if squares[x].rectangle.collidepoint(event.pos) and squares[x] != squares[i]:
 
                                 # We use a try except because it will raise ValueError on illegal move or on Game Over
-                                # try:
+                                try:
 
-                                print(squares[i].pos + squares[x].pos)
+                                    print(squares[i].pos + squares[x].pos)
 
-                                # Check for a castle and return the new board version if it is new at all.
-                                squares = checkCastle(board, squares, squares[i].pos + squares[x].pos)
+                                    playHumanMove(board, squares, i, x)
 
-                                # Check to make sure is legal move using generate_legal_moves not legal_moves.
-                                if chess.Move.from_uci(squares[i].pos + squares[x].pos + 'q') in list(board.generate_legal_moves()):
+                                    playAIMove(board, squares)
 
-                                    print("Promotion!")
-
-                                    # Have to move the piece using from_uci otherwise library does not recongnize as legal
-                                    board.push(chess.Move.from_uci(squares[i].pos + squares[x].pos + 'q'))
-
-                                    # Reset the image variable to new correct image
-                                    squares[x].redoImg('q')
-                                    squares[i].image = None
-
-                                else:
-                                    board.push_san(squares[i].pos + squares[x].pos)
-                                    squares[x].image = squares[i].image
-                                    squares[i].image = None
-
-                                start = time.time()
-                                move = chessbrain.getMove(board, 3, 3, True, True, 'BLACK', -numpy.Infinity, numpy.Infinity)
-                                print(move, chessbrain.searched, time.time() - start)
-                                chessbrain.searched = 0
-                                # Check if castle
-                                squares = checkCastle(board, squares, str(move))
-
-                                # Push the move, we can use from_uci because it should always be legal.
-                                board.push(chess.Move.from_uci(str(move)))
-
-                                if str(move)[len(move) - 1] == 'q':
-                                    found = False
-                                    for pos in squares:
-                                        for newPos in squares:
-                                            f = str(pos.pos + newPos.pos + 'q')
-                                            if f == str(move):
-                                                newPos.redoImg('Q')
-                                                pos.image = None
-                                                found = True
-                                                break
-                                        if found:
-                                            break
-                                else:
-                                    found = False
-                                    for pos in squares:
-                                        for newPos in squares:
-                                            f = str(pos.pos + newPos.pos)
-                                            if f == str(move):
-                                                newPos.image = pos.image
-                                                pos.image = None
-                                                found = True
-                                                break
-                                        if found:
-                                            break
-                            # except:
-                                if board.is_game_over() or board.is_stalemate():
-                                    print("Game Over!")
-                                else:
-                                    print("Invalid Move.")
+                                except (ValueError, TypeError, NameError) as e:
+                                    if board.is_game_over() or board.is_stalemate():
+                                        print("Game Over!")
+                                    else:
+                                        print("Invalid Move. \n{0}".format(e))
 
             elif event.type == pygame.MOUSEMOTION:
                 for i in squares:
@@ -243,5 +192,64 @@ def drawBoard(screen, squares):
             count += 1
         count -= 1
     return screen
+
+def playAIMove(board, squares):
+
+    start_time = time.time()
+    move = chessbrain.getMove(board, 3, 3, True, True, 'BLACK', -numpy.Infinity, numpy.Infinity)
+    print(move, chessbrain.searched, str(time.time() - start_time))
+    chessbrain.searched = 0
+    # chessbrain.searched = 0
+
+    # Check if castle
+    squares = checkCastle(board, squares, str(move))
+
+    board.push(chess.Move.from_uci(str(move)))
+
+    if str(move)[len(move) - 1] == 'q':
+        found = False
+        for pos in squares:
+            for newPos in squares:
+                f = str(pos.pos + newPos.pos + 'q')
+                if f == str(move):
+                    newPos.redoImg('Q')
+                    pos.image = None
+                    found = True
+                    break
+            if found:
+                break
+    else:
+        found = False
+        for pos in squares:
+            for newPos in squares:
+                f = str(pos.pos + newPos.pos)
+                if f == str(move):
+                    newPos.image = pos.image
+                    pos.image = None
+                    found = True
+                    break
+            if found:
+                break
+
+def playHumanMove(board, squares, i, x):
+
+    squares = checkCastle(board, squares, squares[i].pos + squares[x].pos)
+
+    # Check to make sure is legal move using generate_legal_moves not legal_moves.
+    if chess.Move.from_uci(squares[i].pos + squares[x].pos + 'q') in list(board.generate_legal_moves()):
+
+        print("Promotion!")
+
+        # Have to move the piece using from_uci otherwise library does not recongnize as legal
+        board.push(chess.Move.from_uci(squares[i].pos + squares[x].pos + 'q'))
+
+        # Reset the image variable to new correct image
+        squares[x].redoImg('q')
+        squares[i].image = None
+
+    else:
+        board.push_san(squares[i].pos + squares[x].pos)
+        squares[x].image = squares[i].image
+        squares[i].image = None
 
 main()
