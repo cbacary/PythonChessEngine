@@ -1,8 +1,6 @@
 # Chess-Engnine
 
 This is a chess engine that is pretty simple. Only calculation it does is a minimax search with alpha-beta pruning. There are still various bugs.
-The biggest bug right now is even number depth searches are not permitted as it completely messes up everything. Black starts to play the worst possible moves.
-This will be fixed  in the next push.
 
 Only requirements are numpy, pygame, and python-chess.
 
