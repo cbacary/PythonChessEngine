@@ -5,13 +5,23 @@ This is a chess engine that is pretty simple. Only calculation it does is a mini
 Only requirements are numpy, pygame, and python-chess.
 
 pip3 install pygame
+
 pip3 install numpy
+
 pip3 install chess
 
-The game should run with python3 GUI.py or you can just double click the file.
+# To run it
+
+python3 GUI.py
+
+or however you run python files
+
+# Issues?
 
 If you run into any issues, post something on the Issues page and I'll see if I can resolve it, or create a Pull Request.
 
-Note this is not a finished project and I will be implementing many more features to the engine, as well as fixing the various bugs.
+# Notes
+
+There is a Unity port also on my github.
 
 Also note the python-chess library does already have a engine built in. I am not using it because that sort of defeats the entire purpose of this fun project.
